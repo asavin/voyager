@@ -21,16 +21,43 @@
 		<script src="js/stats.min.js"></script>
 		<script src="js/tween.min.js"></script>
 		<script src="js/main.js"></script>
+		<script src="js/jquery.cycle.all.js"></script>
+		<script src="js/jquery.easing.1.3.js"></script>
     </head>
     <body>	
-		<div class="overlay" id="mypopup">Welcome to the <a href="#" id="mylink">Solar</a> System</div>
+		<div class="overlay" id="mypopup">Voyager 1 mission control</div>
 		
 		<div class="year">1976</div>
 		
-		<div class="photo_section">
-			<img src="img/Dione_from_Voyager_1.jpg">
-			<p>Description and link</p>
-		</div>
+		<script type="text/javascript">
+			$(document).ready(function(){
+				$('.slideshow').cycle({
+					fx:'shuffle', 
+					easing: 'easeOutBack',
+					pause: 1,
+					autostop: 5
+				});
+			});
+		</script>
+		<div class="slideshow photo_section">
+				<a href="http://en.wikipedia.org/wiki/File:Titan_3E_with_Voyager_1.jpg" target=_blank><img src="img/Titan_3E_with_Voyager_1.jpg" width="200" height="200"/><div class="voyager_pic_description">Voyager 1 lifted off with a Titan IIIE-Centaur </div></a>
+				
+				<a href="http://en.wikipedia.org/wiki/File:Great_Red_Spot_From_Voyager_1.jpg" target=_blank><img src="img/Great_Red_Spot_From_Voyager_1.jpg" width="200" height="200"/><div class="voyager_pic_description">The Great Red Spot as seen from Voyager 1</div></a>
+				
+				<a href="http://en.wikipedia.org/wiki/File:Jupiter_from_Voyager_1.jpg" target=_blank>
+				<img src="img/Jupiter_from_Voyager_1.jpg" width="200" height="200"/>
+				<div class="voyager_pic_description">False color detail of Jupiter's atmosphere</div></a>
+				
+				<a href="http://en.wikipedia.org/wiki/File:Volcanic_crater_with_radiating_lava_flows_on_Io.jpg" target=_blank>
+				<img src="img/Volcanic_crater_with_radiating_lava_flows_on_Io.jpg" width="200" height="200"/>
+				<div class="voyager_pic_description">View of lava flows radiating from the volcano Ra Patera on Io</div></a>
+				
+				<a href="http://en.wikipedia.org/wiki/File:Vulcanic_Explosion_on_Io.jpg" target=_blank>
+				<img src="img/Vulcanic_Explosion_on_Io.jpg" width="200" height="200"/>
+				<div class="voyager_pic_description">Volcanic eruption on Io photographed from Voyager 1</div></a>
+			</div>
+		
+		<iframe id="golden_record_playlist" src="https://embed.spotify.com/?uri=spotify:user:ulyssestone:playlist:6pcuzwZSIw7OgL149bgJmZ" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
 		
 		<script>
 		
@@ -165,10 +192,17 @@
 		        new THREE.MeshLambertMaterial({color: 0x3D50CC}));
 		scene.add(planetNeptune);
 				
-		
 		//var planet1 = new THREE.Mesh(new THREE.SphereGeometry(20,20,20),
 		//              new THREE.MeshBasicMaterial({color: 0xFFFF00}));
 		//scene.add(planet1);
+		
+		// Draw a Voyager spiral
+		voyagerSpiral = DrawSpiral(0xDDDDDD);
+		voyagerSpiral.rotation.y += 0.5;
+		//var xAxis = new THREE.Vector3(0,1,1);
+		//rotateAroundObjectAxis(voyagerSpiral, xAxis, Math.PI / 180);
+		
+		scene.add(voyagerSpiral);
 		
 		// Create orbit lines for all planets
 		mercuryTrackLine = DrawTrackLine(0xE9F235, 70, 0);
@@ -270,6 +304,24 @@
 		      return new THREE.Line(linegeometry, material);
     
 		  }
+		  
+		  function DrawSpiral(color) {
+		      var linegeometry = new THREE.Geometry();
+		      var material = new THREE.LineBasicMaterial({ color: color, opacity: 1.0 });
+			  a = 10;
+			  b = 550;
+			  centerx = 70;
+			  centery = -150;
+			  for (var i = 0; i < 20; i++) {
+			          angle = 0.1 * i;
+			          x = centerx + (a + b * angle) * Math.cos(angle);
+			          y = centery + (a + b * angle) * Math.sin(angle);
+					  linegeometry.vertices.push(new THREE.Vector3(x, 0, y));
+			      }
+
+		      return new THREE.Line(linegeometry, material);
+		  
+		  }
 		
 		var dt = 0;
 		var current_year = 1976;
@@ -331,6 +383,9 @@
 					dt = 0;
 					difference_year += 1;
 					$('.year').text(parseInt($('.year').text()) + 1);
+					
+					// Check for images this year and display if any
+					//displayPics();
 				}
 				
 								
@@ -363,6 +418,35 @@
 			object.lensFlares[ 3 ].rotation = object.positionScreen.x * 0.5 + THREE.Math.degToRad( 45 );
 
 		}
+
+		// Utility method for rotating objects around its own axis
+		function rotateAroundObjectAxis(object, axis, radians) {
+		    rotObjectMatrix = new THREE.Matrix4();
+		    rotObjectMatrix.makeRotationAxis(axis.normalize(), radians);
+		    object.matrix.multiply(rotObjectMatrix);      // post-multiply
+		    object.rotation.setEulerFromRotationMatrix(object.matrix, object.scale);
+		}
+		
+		/*function displayPics() {
+		    if($('.year').text()=='1977') {
+				$('#voyager_pic').fadeOut();
+			    $('#voyager_pic').attr('src', 'img/Titan_3E_with_Voyager_1.jpg');
+				$('#voyager_pic').fadeIn();
+				$('#voyager_pic_description').text("Voyager 1 launch");
+			} else if ($('.year').text()=='1978') {
+				
+			    $('#voyager_pic2').attr('src', 'img/Jupiter_from_Voyager_1.jpg');
+				
+				$('#voyager_pic_description').text("Jupiter from Voyager");
+				$('#voyager_pic2').fadeIn();
+				$('#voyager_pic').fadeOut();
+			} else if ($('.year').text()=='1979') {
+			    $('#voyager_pic').attr('src', 'img/Great_Red_Spot_From_Voyager_1.jpg');
+				$('#voyager_pic_description').text("Jupiter from Voyager");
+				$('#voyager_pic').fadeIn();
+				$('#voyager_pic2').fadeOut();
+			}
+		}*/
 
 		$('#mylink').click(function(e){
 			e.preventDefault();
