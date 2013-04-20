@@ -16,6 +16,7 @@ input,
 select,
 textarea {
     color: #222;
+	font-family: Helvetica, Arial;
 }
 
 body {
@@ -121,10 +122,51 @@ textarea {
 	border: 5px solid #555;
 	color: white;
 	margin: 20px;
+	z-index: 100;
+	width: auto;
+	min-width: 100px;
+	max-width: 400px;
+	min-height: 50px;
+	height: auto;
+	transition: all 0.5s ease;
 	}
+	
+	.year {
+	color: white;
+	position: absolute;
+	left: 10px;
+	bottom: 10px;
+	font-size: 2em;
+	}
+	
+	#stats {
+	      width: 160px!important;
+	    }
+	#fpsText {
+	      color: #ffffff!important;
+	      font-size: 16px!important;
+	    }
+	
 
-
-
+		.photo_section {
+			z-index: 1;
+			position: fixed;
+			width: 200px;
+			height: 200px;
+			overflow: hidden;
+			right: 10px;
+			top: 10px;
+		}
+		
+		.photo_section img {
+			width: 200px;
+			height: auto;
+		}
+		
+		.photo_section p {
+		color: white;
+		text-align: center;
+		}
 
 
 

@@ -6,7 +6,7 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title></title>
+        <title>Voyager Mission</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width">
 
@@ -17,19 +17,27 @@
         <link rel="stylesheet" href="css/bootstrap.min.css">
 		<script src="js/vendor/jquery-1.9.1.min.js"></script>
         <script src="js/vendor/modernizr-2.6.2.min.js"></script>
-		<script src="js/three.js"></script>>		
+		<script src="js/three.js"></script>
+		<script src="js/stats.min.js"></script>
+		<script src="js/tween.min.js"></script>
+		<script src="js/main.js"></script>
     </head>
-    <body>
-        <!--[if lt IE 7]>
-            <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
-        <![endif]-->
-
-        <!-- Add your site or application content here -->
-		<h1 class="center">The Voyager Mission</h1>
+    <body>	
+		<div class="overlay" id="mypopup">Welcome to the <a href="#" id="mylink">Solar</a> System</div>
 		
-		<div class="overlay">Welcome to the Solar System</div>
+		<div class="year">1976</div>
+		
+		<div class="photo_section">
+			<img src="img/Dione_from_Voyager_1.jpg">
+			<p>Description and link</p>
+		</div>
+		
+		<script>
+		
+		</script>
 
 		<script type="text/javascript">
+		
 		// Some initializations
 		
 		width = document.body.clientWidth;
@@ -42,10 +50,34 @@
 		renderer.setClearColor(0x111111, 1.0);
 		renderer.clear();
 		
+		// Stats
+		stats = new Stats();
+		stats.domElement.style.position = 'fixed';
+		stats.domElement.style.right = '0px';
+		stats.domElement.style.bottom = '10px';
+		document.body.appendChild(stats.domElement);
+		
 		// new THREE.PerspectiveCamera( FOV, viewAspectRatio, zNear, zFar );
 		var camera = new THREE.PerspectiveCamera(45, width/height, 1, 100000);
-		camera.position.z = 300;
+		//camera.position.z = 300;
+		//camera.position.y = -100;
 		
+		
+		
+		
+		// Animate camera movement with Tween
+		var position = { x : 0, y: -100, z: 300 };
+		var target = { x : 400, y: 500, z: -800 };
+		var tween = new TWEEN.Tween(position).to(target, 4000);
+		
+		tween.delay(500);
+		tween.easing(TWEEN.Easing.Quadratic.InOut);
+		
+		tween.onUpdate(function(){
+			camera.position = position;
+		});
+		
+		tween.start();
 		
 		var scene = new THREE.Scene();
 		
@@ -87,25 +119,51 @@
 
 		scene.add( lensFlare );
 		
+		// Create all planets with some scale
 		
-		var planet2 = new THREE.Mesh(
+		var planetEarth = new THREE.Mesh(
 		        new THREE.SphereGeometry(10, 10, 10),
 		        new THREE.MeshLambertMaterial({color: 0x00B3FF}));
-		
-		
-	    scene.add(planet2);
-		
+	    scene.add(planetEarth);
+	
 		var planetMercury = new THREE.Mesh(
-		        new THREE.SphereGeometry(10, 10, 10),
+		        new THREE.SphereGeometry(5, 5, 5),
 		        new THREE.MeshLambertMaterial({color: 0xE9F235}));
-				
 		scene.add(planetMercury);
-		
+	
 		var planetVenus = new THREE.Mesh(
 		        new THREE.SphereGeometry(10, 10, 10),
 		        new THREE.MeshLambertMaterial({color: 0xF2B035}));
-				
 		scene.add(planetVenus);
+		
+		var planetMars = new THREE.Mesh(
+		        new THREE.SphereGeometry(10, 10, 10),
+		        new THREE.MeshLambertMaterial({color: 0xB31222}));
+		scene.add(planetMars);
+		
+		var planetJupiter = new THREE.Mesh(
+		        new THREE.SphereGeometry(30, 30, 30),
+		        new THREE.MeshLambertMaterial({color: 0xEB6117}));
+		scene.add(planetJupiter);
+		
+		var planetSaturn = new THREE.Mesh(
+		        new THREE.SphereGeometry(25, 25, 25),
+		        new THREE.MeshLambertMaterial({color: 0xE6BC8C}));
+				
+		var saturnRing = new THREE.Mesh(new THREE.CylinderGeometry(50, 50, 1, 24, 1, false ),new THREE.MeshLambertMaterial( { color: 0xE6BC8C } ));
+		scene.add(planetSaturn);
+		scene.add(saturnRing);
+						
+		
+		var planetUranus = new THREE.Mesh(
+		        new THREE.SphereGeometry(20, 20, 20),
+		        new THREE.MeshLambertMaterial({color: 0x3E7018}));
+		scene.add(planetUranus);
+		
+		var planetNeptune = new THREE.Mesh(
+		        new THREE.SphereGeometry(20, 20, 20),
+		        new THREE.MeshLambertMaterial({color: 0x3D50CC}));
+		scene.add(planetNeptune);
 				
 		
 		//var planet1 = new THREE.Mesh(new THREE.SphereGeometry(20,20,20),
@@ -139,6 +197,8 @@
 		
 		plutoTrackLine = DrawTrackLine(0x590B63, 630, 0);
 		scene.add(plutoTrackLine);
+		
+		
 		
 		// Create the outer stars
 		
@@ -211,29 +271,68 @@
     
 		  }
 		
+		var dt = 0;
+		var current_year = 1976;
+		var difference_year = -1;
+		
+		// Shifts for the planets in 1977, based on the Celestia data
+		// Not exactly scientifically accurate, but can be easily adjusted
+		var saturnShift = 130000;
+		var jupiterShift = 70000;
+		var uranusShift = 20000;
+		var neptuneShift = -40000;
+		
 		function animate(t) {
-		        // spin the camera in a circle
-		        //camera.position.x = Math.sin(t/1000)*300;
-		        //camera.position.y = 150;
-		        //camera.position.z = Math.cos(t/1000)*300;
-				
+			    
 				
 		        // you need to update lookAt every frame
 		        camera.lookAt(scene.position);
 		        
-				planet2.position.x = Math.cos(t/1800)*170;
-				//planet2.position.y = 60-Math.sin(t/900)*25;
-				planet2.position.z = Math.sin(t/1800)*170;
-				//planet2.rotation.x = t/500;
-				//planet2.rotation.y = t/800;
+				// Earth orbital motion
+				planetEarth.position.x = Math.cos(t/1800)*170;
+				planetEarth.position.z = Math.sin(t/1800)*170;
 				
 				// Animating Mercury
-				planetMercury.position.x = Math.cos(t/1500)*70;
-				planetMercury.position.z = Math.sin(t/1500)*70;
+				planetMercury.position.x = Math.cos(t/434)*70;
+				planetMercury.position.z = Math.sin(t/434)*70;
 				
 				// Animating Venus
-				planetVenus.position.x = Math.cos(t/1600)*120;
-				planetVenus.position.z = Math.sin(t/1600)*120;
+				planetVenus.position.x = Math.cos(t/1109)*120;
+				planetVenus.position.z = Math.sin(t/1109)*120;
+				
+				// Animating Mars
+				planetMars.position.x = Math.cos(t/3388)*230;
+				planetMars.position.z = Math.sin(t/3388)*230;
+				
+				// Animating Jupiter
+				planetJupiter.position.x = Math.cos((t+jupiterShift)/21366)*330;
+				planetJupiter.position.z = Math.sin((t+jupiterShift)/21366)*330;
+				
+				// Animating Saturn
+				planetSaturn.position.x = Math.cos((t + saturnShift)/53059)*400;
+				planetSaturn.position.z = Math.sin((t + saturnShift)/53059)*400;
+				saturnRing.position = planetSaturn.position
+				
+				// Animating Uranus
+				planetUranus.position.x = Math.cos((t+uranusShift)/151885)*480;
+				planetUranus.position.z = Math.sin((t+uranusShift)/151885)*480;
+				
+				// Animating Neptune
+				planetNeptune.position.x = Math.cos((t+ neptuneShift)/296827)*550;
+				planetNeptune.position.z = Math.sin((t+neptuneShift)/296827)*550;
+				
+				TWEEN.update();
+				stats.update();
+				
+				// Calculating current year since the start of simulation
+				dt = t - difference_year * 11400;
+				
+				if(dt > 11400) {
+					dt = 0;
+					difference_year += 1;
+					$('.year').text(parseInt($('.year').text()) + 1);
+				}
+				
 								
 				// renderer automatically clears unless autoClear = false
 		        renderer.render(scene, camera);
@@ -265,11 +364,17 @@
 
 		}
 
+		$('#mylink').click(function(e){
+			e.preventDefault();
+		    console.log("hello");
+			tween.stop();	
+		});
+
 		</script>
 
 
         <script src="js/plugins.js"></script>
-        <script src="js/main.js"></script>
+        
 
     </body>
 </html>

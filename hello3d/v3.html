@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Voyager Mission</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width">
+
+        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+
+        <link rel="stylesheet" href="css/normalize.css">
+        <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+		<script src="js/vendor/jquery-1.9.1.min.js"></script>
+        <script src="js/vendor/modernizr-2.6.2.min.js"></script>
+		<script src="js/three.js"></script>	
+    </head>
+    <body><div class="overlay">Welcome to the Solar System</div>
+
+		<script type="text/javascript">
+		// Some initializations
+		
+		width = document.body.clientWidth;
+		height = document.body.clientHeight;
+		var renderer = new THREE.WebGLRenderer({antialias: true});
+		renderer.setSize(document.body.clientWidth, 
+		                       document.body.clientHeight);
+							   
+		document.body.appendChild(renderer.domElement);
+		renderer.setClearColor(0x111111, 1.0);
+		renderer.clear();
+		
+		// new THREE.PerspectiveCamera( FOV, viewAspectRatio, zNear, zFar );
+		var camera = new THREE.PerspectiveCamera(45, width/height, 1, 100000);
+		camera.position.z = 300;
+		
+		
+		var scene = new THREE.Scene();
+		
+		
+		//var planeGeo = new THREE.PlaneGeometry(400, 200, 10, 10);
+		//var planeMat = new THREE.MeshLambertMaterial({color: 0xFFFFFF});
+		//var plane = new THREE.Mesh(planeGeo, planeMat);
+		//plane.rotation.x = -Math.PI/2;
+		//plane.position.y = -25;
+		//plane.receiveShadow = true;
+		//scene.add(plane);
+		
+		// lens flares
+
+		var textureFlare0 = THREE.ImageUtils.loadTexture( "img/lensflare/lensflare0.png" );
+		var textureFlare2 = THREE.ImageUtils.loadTexture( "img/lensflare/lensflare2.png" );
+		var textureFlare3 = THREE.ImageUtils.loadTexture( "img/lensflare/lensflare3.png" );
+		
+		var light = new THREE.PointLight();
+		light.position.set( 0, 0, 0 );
+		scene.add(light);
+		
+		var flareColor = new THREE.Color( 0xffffff );
+		flareColor.setHSL( 0.55, 0.9, 0.5 + 0.5 );
+
+		var lensFlare = new THREE.LensFlare( textureFlare0, 700, 0.0, THREE.AdditiveBlending, flareColor );
+
+		lensFlare.add( textureFlare2, 512, 0.0, THREE.AdditiveBlending );
+		lensFlare.add( textureFlare2, 512, 0.0, THREE.AdditiveBlending );
+		lensFlare.add( textureFlare2, 512, 0.0, THREE.AdditiveBlending );
+
+		lensFlare.add( textureFlare3, 60, 0.6, THREE.AdditiveBlending );
+		lensFlare.add( textureFlare3, 70, 0.7, THREE.AdditiveBlending );
+		lensFlare.add( textureFlare3, 120, 0.9, THREE.AdditiveBlending );
+		lensFlare.add( textureFlare3, 70, 1.0, THREE.AdditiveBlending );
+
+		lensFlare.customUpdateCallback = lensFlareUpdateCallback;
+		lensFlare.position = light.position;
+
+		scene.add( lensFlare );
+		
+		
+		var planet2 = new THREE.Mesh(
+		        new THREE.SphereGeometry(10, 10, 10),
+		        new THREE.MeshLambertMaterial({color: 0x00B3FF}));
+		
+		
+	    scene.add(planet2);
+		
+		var planetMercury = new THREE.Mesh(
+		        new THREE.SphereGeometry(10, 10, 10),
+		        new THREE.MeshLambertMaterial({color: 0xE9F235}));
+				
+		scene.add(planetMercury);
+		
+		var planetVenus = new THREE.Mesh(
+		        new THREE.SphereGeometry(10, 10, 10),
+		        new THREE.MeshLambertMaterial({color: 0xF2B035}));
+				
+		scene.add(planetVenus);
+				
+		
+		//var planet1 = new THREE.Mesh(new THREE.SphereGeometry(20,20,20),
+		//              new THREE.MeshBasicMaterial({color: 0xFFFF00}));
+		//scene.add(planet1);
+		
+		// Create orbit lines for all planets
+		mercuryTrackLine = DrawTrackLine(0xE9F235, 70, 0);
+		scene.add(mercuryTrackLine);
+		
+		venusTrackLine = DrawTrackLine(0xF2B035, 120, 0);
+		scene.add(venusTrackLine);
+		
+		earthTrackLine = DrawTrackLine(0x35B3F2, 170, 0);
+		scene.add(earthTrackLine);
+		
+		marsTrackLine = DrawTrackLine(0xB31222, 230, 0);
+		scene.add(marsTrackLine);
+		
+		jupiterTrackLine = DrawTrackLine(0xEB6117, 330, 0);
+		scene.add(jupiterTrackLine);
+		
+		saturnTrackLine = DrawTrackLine(0xE6BC8C, 400, 0);
+		scene.add(saturnTrackLine);
+		
+		uranusTrackLine = DrawTrackLine(0x3E7018, 480, 0);
+		scene.add(uranusTrackLine);
+		
+		neptuneTrackLine = DrawTrackLine(0x3D50CC, 550, 0);
+		scene.add(neptuneTrackLine);
+		
+		plutoTrackLine = DrawTrackLine(0x590B63, 630, 0);
+		scene.add(plutoTrackLine);
+		
+		// Create the outer stars
+		
+		var particleCount = 1800,
+		    particles = new THREE.Geometry(),
+		    pMaterial =
+		      new THREE.ParticleBasicMaterial({
+		        color: 0xFFFFFF,
+		        size: 5,
+				map: THREE.ImageUtils.loadTexture(
+				      "particle.png"
+				),
+				blending: THREE.AdditiveBlending,
+			    transparent: true
+		      });
+
+		// now create the individual particles
+		for(var p = 0; p < particleCount; p++) {
+
+		  // create a particle with random
+		  // position values, -250 -> 250
+		  var pX = Math.random() * 1000 - 500,
+		      pY = Math.random() * 1000 - 500,
+		      pZ = Math.random() * 1000 - 500,
+		      particle = new THREE.Vertex(
+		        new THREE.Vector3(pX, pY, pZ)
+		      );
+
+		  // add it to the geometry
+		  particles.vertices.push(particle);
+		}
+
+		// create the particle system
+		var particleSystem =
+		  new THREE.ParticleSystem(
+		    particles,
+		    pMaterial);
+
+		// add it to the scene
+		scene.add(particleSystem);
+		
+		// Magic for the mouse
+		down=false;
+		window.onmousedown = function (ev){
+	        down = true; sx = ev.clientX; sy = ev.clientY;
+	      };
+	      window.onmouseup = function(){ down = false; };
+	      window.onmousemove = function(ev) {
+	        if (down) {
+	          var dx = ev.clientX - sx;
+	          var dy = ev.clientY - sy;
+	          camera.position.x -= dx;
+	          camera.position.y += dy;
+	          sx += dx;
+	          sy += dy;
+	        }
+	      };
+		
+		  function DrawTrackLine(color, radius, position) {
+    
+		      var size = 360 / radius;
+		      var linegeometry = new THREE.Geometry();
+		      var material = new THREE.LineBasicMaterial({ color: color, opacity: 1.0 });
+		      for (var i = 0; i <= radius; i++) {
+		          var segment = (i * size) * Math.PI / 180;
+		          linegeometry.vertices.push(new THREE.Vector3(Math.cos(segment) * radius, 0, Math.sin(segment) * radius));
+		      }
+
+		      return new THREE.Line(linegeometry, material);
+    
+		  }
+		
+		function animate(t) {
+		        // spin the camera in a circle
+		        //camera.position.x = Math.sin(t/1000)*300;
+		        //camera.position.y = 150;
+		        //camera.position.z = Math.cos(t/1000)*300;
+				
+				
+		        // you need to update lookAt every frame
+		        camera.lookAt(scene.position);
+		        
+				planet2.position.x = Math.cos(t/1800)*170;
+				//planet2.position.y = 60-Math.sin(t/900)*25;
+				planet2.position.z = Math.sin(t/1800)*170;
+				//planet2.rotation.x = t/500;
+				//planet2.rotation.y = t/800;
+				
+				// Animating Mercury
+				planetMercury.position.x = Math.cos(t/1500)*70;
+				planetMercury.position.z = Math.sin(t/1500)*70;
+				
+				// Animating Venus
+				planetVenus.position.x = Math.cos(t/1600)*120;
+				planetVenus.position.z = Math.sin(t/1600)*120;
+								
+				// renderer automatically clears unless autoClear = false
+		        renderer.render(scene, camera);
+		        window.requestAnimationFrame(animate, renderer.domElement);
+		      };
+		 animate(new Date().getTime());
+		 
+		 function lensFlareUpdateCallback( object ) {
+
+			var f, fl = object.lensFlares.length;
+			var flare;
+			var vecX = -object.positionScreen.x * 2;
+			var vecY = -object.positionScreen.y * 2;
+
+
+			for( f = 0; f < fl; f++ ) {
+
+				   flare = object.lensFlares[ f ];
+
+				   flare.x = object.positionScreen.x + vecX * flare.distance;
+				   flare.y = object.positionScreen.y + vecY * flare.distance;
+
+				   flare.rotation = 0;
+
+			}
+
+			object.lensFlares[ 2 ].y += 0.025;
+			object.lensFlares[ 3 ].rotation = object.positionScreen.x * 0.5 + THREE.Math.degToRad( 45 );
+
+		}
+
+		</script>
+
+
+        <script src="js/plugins.js"></script>
+        <script src="js/main.js"></script>
+
+    </body>
+</html>
