@@ -115,7 +115,6 @@ textarea {
 
 	.overlay {
 	position: fixed;
-	background: #111;
 	padding: 20px;
 	border-radius: 5px;
 	opacity: 1;
@@ -132,6 +131,18 @@ textarea {
 	left: 40px;
 	bottom: 40px;
 	font-size: 2em;
+	}
+	
+	.github_link {
+	position: absolute;
+	bottom: 10px;
+	text-align: center;
+	left: 30%;
+	color: white;
+	}
+	
+	.github_link a {
+	color: white;
 	}
 	
 	#stats {
@@ -184,7 +195,7 @@ textarea {
 		opacity: 1;
 		}
 		
-		.slideshow{height:232px;width:232px;margin:auto}
+		.slideshow{height:232px;width:232px;margin:auto;}
 		.slideshow img{padding:15px;border:1px solid #333;background-color:#222;
 		border-radius: 4px;
 		}
